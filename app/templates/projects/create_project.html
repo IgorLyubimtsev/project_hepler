@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-wrapper">
+    <div class="container mt-5">
+        <div class="create_project_card">
+            <div class="create-field-area">
+                <h2 class="mb-4" style="border-bottom: 1px solid #d9d9d9; padding-bottom: 2rem;">Создание проекта</h2>
+                <form method="post" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <div class="row">
+                        <div class="floating-label-group col-8">
+                            {{ form.title(class='form-control', placeholder=' ') }}
+                            <label for="{{ form.title.id }}">Название проекта</label>
+                            {% if form.title.errors %}
+                            <div class="text-danger">{{ form.title.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="floating-label-group col-4">
+                            {{ form.project_type(class='form-select', placeholder=' ') }}
+                            <label for="{{ form.title.id }}">Тип проекта</label>
+                            <div class="select-error hidden">Пожалуйста, выберите тип проекта</div>
+                            {% if form.project_type.errors %}
+                                <div class="select-error">{{ form.project_type.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 1.5rem;">
+                        <div class="mb-3 col-6 floating-label-group">
+                            {{ form.curator(class='form-control input-with-tooltip', id='create-page-curator-autocomplete', placeholder=' ', **{'data-tooltip': 'Выберите из списка. В поле сохранится табельный номер.'}) }}
+                            <label for="create-page-curator-autocomplete">Куратор</label>
+                            <input type="hidden" name="create-page-curator" id="create-page-curator-hidden">
+                            {% if form.curator.errors %}
+                                <div class="text-danger">{{ form.curator.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3 col-6 floating-label-group">
+                            {{ form.product_owner(class='form-control input-with-tooltip', type='text', id="create-page-product-owner-autocomplete", placeholder=' ', **{'data-tooltip': 'Выберите из списка. В поле сохранится табельный номер.'}) }}
+                            <label for="create-page-product-owner-autocomplete">P.Owner (Спикер)</label>
+                            <input type="hidden" name="create-page-product_owner" id="create-page-product-owner-hidden">
+                            {% if form.product_owner.errors %}
+                                <div class="text-danger">{{ form.product_owner.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="floating-label-group mb-3 col-12" style="margin-top: 1.5rem;">
+                        {{ form.team(class='form-control input-with-tooltip', type='text', style='white-space: nowrap;', id="create-page-team-autocomplete", placeholder=' ', **{'data-tooltip': 'Начните вводить ФИО сотрудника'})}}
+                        <label for="{{ form.team.id }}">Команда</label>
+                        {% if form.team.errors %}
+                            <div class="text-danger">{{ form.team.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row" style="margin-top: 1.5rem;">
+                        <div class="floating-label-group col-4">
+                            {{ form.deadline(class='form-control', type='date', id='deadline', placeholder=' ') }}
+                            <label for="{{ form.deadline.id }}">Deadline</label>
+                            {% if form.deadline.errors %}
+                            <div class="text-danger">{{ form.deadline.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="floating-label-group col-4">
+                            {{ form.agile_open_date(class='form-control', type='date', id="agile_open_date", placeholder=' ') }}
+                            <label for="{{ form.agile_open_date.id }}">Открытие на Agile BL</label>
+                            {% if form.agile_open_date.errors %}
+                            <div class="text-danger">{{ form.agile_open_date.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="floating-label-group col-4">
+                            {{ form.open_protocol(class='form-control', id="open_protocol", placeholder=' ') }}
+                            <label for="{{ form.open_protocol.id }}">Номер протокола</label>
+                            {% if form.open_protocol.errors %}
+                            <div class="text-danger">{{ form.open_protocol.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row" style="display: flex; justify-content: center; margin-top: 1.5rem;">
+                        <div class="row floating-label-group col-4" style="height: 40px;">
+                            {{ form.base_bank(class='form-select', placeholder=' ')}}
+                            <label for="{{ form.base_bank.id }}">Базовый Банк</label>
+                            {% if form.base_bank.errors %}
+                                <div class="select-error">{{ form.base_bank.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="create-ter-banks col-8" style="padding-left: 2rem;">
+                            <div class="row">
+                                <div class="col-3"> {{ form.bb() }} {{ form.bb.label }}</div>
+                                <div class="col-3"> {{ form.vvb() }} {{ form.vvb.label }}</div>
+                                <div class="col-3"> {{ form.dvb() }} {{ form.dvb.label }}</div>
+                                <div class="col-3"> {{ form.mb() }} {{ form.mb.label }}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3"> {{ form.pb() }} {{ form.pb.label }}</div>
+                                <div class="col-3"> {{ form.szb() }} {{ form.szb.label }}</div>
+                                <div class="col-3"> {{ form.sibb() }} {{ form.sibb.label }}</div>
+                                <div class="col-3"> {{ form.srb() }} {{ form.srb.label }}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3"> {{ form.ub() }} {{ form.ub.label }}</div>
+                                <div class="col-3"> {{ form.ccb() }} {{ form.ccb.label }}</div>
+                                <div class="col-3"> {{ form.yuzb() }} {{ form.yuzb.label }}</div>
+                            </div>
+                            <small class="text-muted">Выберите банки-участники</small>
+                        </div>
+                    </div>
+
+                    <div class="mt-4" style="border-top: 1px solid #d9d9d9; padding-top: 2rem; display: flex; justify-content: end; gap: 1rem;">
+                        <a href="{{ url_for('project_new.index') }}" class="btn btn-secondary ms-2" id="create-btn-back">Назад</a>
+                        {{ form.submit(class='btn btn-primary') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="tooltip" class="custom-tooltip">
+    <div class="tooltip-body">
+        <img src="/static/img/info.svg" class="tooltip-icon" alt="info">
+        <span class="tooltip-text"></span>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    const select = document.getElementById('project_type');
+    const base_bank_select = document.getElementById('base_bank')
+
+    const errorMsg = document.querySelector('.select-error');
+
+
+    select.addEventListener('blur', () => {
+        if (select.value === '') {
+            select.classList.add('invalid');
+            select.classList.remove('hidden');
+        } else {
+            select.classList.remove('invalid');
+            if (!select.dataset.serverError) {
+                errorMsg.classList.add('hidden')
+            }     
+        }
+    });
+
+    base_bank_select.addEventListener('blur', () => {
+        if (base_bank_select.value === '') {
+            base_bank_select.classList.add('invalid');
+            base_bank_select.classList.remove('hidden');
+        } else {
+            base_bank_select.classList.remove('invalid');
+            if (!base_bank_select.dataset.serverError) {
+                errorMsg.classList.add('hidden')
+            }     
+        }
+    });
+
+</script>
+{% endblock %}

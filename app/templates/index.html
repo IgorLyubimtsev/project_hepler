@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}Главная страница {% endblock %}
+{% block content %}
+
+    <div class="page-wrapper">
+        <div class="contols-btns">
+            <div class="table-info col-6">
+                <label class="label-style" style="background-color: #dbe1ff; color: #616161;">Всего: {{project_count}} </label>
+                <label class="label-style" style="background-color: #caffe2; color: #336d00;">В работе: {{ status_stats['В работе'] }}</label>
+                <label class="label-style" style="background-color: #fffbd4; color: #634a00;">Тех. продление: {{ status_stats['Техническое продление'] }}</label>
+                <label class="label-style" style="background-color: #ffa0a0; color: #770000;">Задерживается: {{ status_stats['Задерживается'] }}</label>
+            </div>
+            <div class="table-actions col-6">
+                <div class="lvl">
+                    <a href="{{url_for('project_new.create_project')}}" class="btn btn-table-info btn-table-info-add "><img src="/static/img/add.png" alt="+" style="width: 30px;">Добавить новый проект</a>
+                </div>
+                <div class="lvl">
+                    <div class="search-container">
+                        <img src="/static/img/search.png" alt="Поиск" class="search-icon">
+                        <input type="text" id="search-input-index" class="search-input" placeholder="Поиск по проекту...">
+                        <span class="clear-icon" id="clear-search-index">&times;</span>
+                    </div>
+                    <a class="btn btn-table-info btn-hover" id="export-btn" data-bs-toggle="modal" data-bs-target="#filterModal"><img src="/static/img/export.png" alt="+" style="width: 30px;">Фильтрация/Экспорт</a>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+                    <div class="table-block-parametres">
+                        <table class="custom-table" id="custom-table-index">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="highlight-toggle-in-table" title="Подсветка строк">
+                                    </th>
+                                    <th>НОМЕР ПРОЕКТА</th>
+                                    <th>НАЗВАНИЕ ПРОЕКТА</th>
+                                    <th>ТИП</th>
+                                    <th>КУРАТОР</th>
+                                    <th>P.OWNER (СПИКЕР)</th>
+                                    <th>DEADLINE</th>
+                                    <th>СТАТУС</th>
+                                    <th>ДЕЙСТВИЯ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                    <tr class="status-{{project.status|lower|replace(' ', '-')|replace('ё', 'е')}}">
+                                        <td></td>
+                                        <td>{{ project.project_number }}</td>
+                                        <td>{{ project.title }}</td>
+                                        <td>{{ project.project_type }}</td>
+                                        <td>{{ project.curator }}</td>
+                                        <td>{{ project.product_owner }}</td>
+                                        <td>{{ project.deadline.strftime('%Y-%m-%d') if project.deadline else '-' }}</td>
+                                        <td>{{ project.status }}</td>
+                                        <td>
+                                            <div class="dropdown" style="position: unset;">
+                                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    ⋯
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('project_new.view_project', project_id=project.id) }}">
+                                                            🔍 Просмотр
+                                                        </a>
+                                                    </li>
+
+                                                    {% if (project.creator == current_user.id and project.status != 'Завершен') or current_user.status == 1 %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ url_for('project_new.edit_project', project_id=project.id) }}">
+                                                            ✏️ Редактировать
+                                                        </a>
+                                                    </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+        </div>
+        <!-- Модальное окно -->
+        <div class="modal fade" id="filterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <form method="get" action="{{ url_for('project_new.index') }}">
+                <div class="modal-header">
+                <h5 class="modal-title">Фильтрация</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <div class="mb-3">
+                    <label>Статус проекта</label>
+                    <select name="status" class="form-select">
+                    <option value="">Любой</option>
+                    <option value="В работе">В работе</option>
+                    <option value="Завершен">Завершен</option>
+                    <option value="Техническое продление">Техническое продление</option>
+                    <option value="Задерживается">Задеживается</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Куратор</label>
+                    <input type="text" name="curator" class="form-control">
+                </div>
+                </div>
+                <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Применить фильтр</button>
+                <a id="exportBtn" class="btn btn-success" href="#">Экспорт</a>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const table = document.getElementById('custom-table-index')
+
+        if (!table) {
+            return
+        }  
+        
+        const toggle = document.getElementById('highlight-toggle-in-table');
+        const storedPref = localStorage.getItem('highlightByType');
+
+        if (storedPref === 'true') {
+            table.classList.add('highlight-by-type');
+            toggle.checked = true;
+        } else {
+            table.classList.remove('highlight-by-type');
+            toggle.checked = false
+        }
+
+        toggle.addEventListener('change', function () {
+            const enabled = toggle.checked;
+            if (enabled) {
+                table.classList.add('highlight-by-type');
+                localStorage.setItem('highlightByType', 'true');
+            } else {
+                table.classList.remove('highlight-by-type');
+                localStorage.setItem('highlightByType', 'false');         
+            }
+        });
+
+        const exportBtn = document.getElementById('exportBtn');
+        const form = document.querySelector('#filterModal form');
+
+        // Сначала соберем фильтры
+        function buildExportUrl() {
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData).toString();
+            return "{{ url_for('act.export_filtered') }}" + '?' + params;
+        }
+
+        exportBtn.addEventListener('click', function (e) {
+            e.preventDefault();  // Останавливаем переход по пустой ссылке
+            const url = buildExportUrl();
+            window.location.href = url;  // Принудительно переходим
+        });
+
+        // Можно заранее обновлять href при изменении полей
+        form.addEventListener('input', () => {
+            exportBtn.href = buildExportUrl();
+        });
+});
+</script>
+{% endblock %}

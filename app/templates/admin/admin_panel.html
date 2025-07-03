@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <div class="container mt-5">
+        <div class="admin-card">
+            <div class="admin-header">
+                <h2>Админ-панель</h2>
+            </div>
+            <div class="admin-body">
+                <div class="row d-flex justify-content-center">
+                    <div class="admin-project-import m-4 col-md-5">
+                        <h4>Импортировать проекты из Excel</h4>
+                        <form action="{{ url_for('act.import_excel') }}" method="post" enctype="multipart/form-data">
+                            {{ form.hidden_tag() }}
+                            <input type="file" name="file" accept=".xlsx">
+                            <button type="submit" class="btn btn-primary mt-2">Импортировать из Excel</button>
+                        </form>
+                    </div>
+                    <div class="persons-export m-4 col-md-5">
+                        <h4>Импортировать сотрудников из Excel</h4>
+                        <form action="{{ url_for('act.import_employees') }}" method="post" enctype="multipart/form-data">
+                            {{ form.hidden_tag() }}
+                            <input type="file" name="file_employee" accept=".xlsx" required>
+                            <button type="submit" class="btn btn-primary">Импортировать сотрудников</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="row tab-card">
+                    <h4 class="pt-2 mb-4 card-header clickable">Управление пользователями</h4>
+                    <div class="d-flex flex-column card-body hidden-content" id="users-table">
+                        <div class="search-container" style="width: unset; margin: 1rem;">
+                            <img src="/static/img/search.png" alt="Поиск" class="search-icon">
+                            <input type="text" id="search-input-user" class="search-input" placeholder="Поиск по пользователю...">
+                            <span class="clear-icon" id="clear-search-user">&times;</span>
+                        </div>
+                        <div class="admin-users-table">
+                            <table class="custom-table" id="custom-table-user">
+                                <thead>
+                                    <tr>
+                                        <th>id</th>
+                                        <th>staff_number</th>
+                                        <th>full_name</th>
+                                        <th>department</th>
+                                        <th>position</th>
+                                        <th>status</th>
+                                        <th>verified</th>
+                                        <th>action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.staff_number }}</td>
+                                        <td>{{ user.full_name }}</td>
+                                        <td>{{ user.department }}</td>
+                                        <td>{{ user.position }}</td>
+                                        {% if user.status == 1%}
+                                            <td>admin</td>
+                                        {% else %}
+                                            <td>user</td>
+                                        {% endif %}
+                                        <td>{{ user.is_verified }}</td>
+                                        <td>                                            
+                                            <div class="dropdown" style="position: unset;">
+                                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    ⋯
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    {% if user.status == 0 %}
+                                                        <li>
+                                                            <a class="dropdown-item" href=" {{ url_for('admin.add_admin', user_id=user.id) }} ">
+                                                                Сделать админом
+                                                            </a>
+                                                        </li>
+                                                    {% else %}
+                                                        <li>
+                                                            <a class="dropdown-item" href=" {{ url_for('admin.admin_unset', user_id=user.id) }} ">
+                                                                Убрать админку
+                                                            </a>
+                                                        </li>
+                                                    {% endif %}
+                                                    <li>
+                                                        <a class="dropdown-item" href=" {{ url_for('admin.user_delete', user_id=user.id) }} ">
+                                                            Удалить аккаунт
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row tab-card">
+                    <h4 class="card-header clickable pt-2 mb-4">Управление проектами</h4>
+                    <div class="d-flex flex-column card-body hidden-content" id="project-table">
+                        <div class="search-container" style="width: unset; margin: 1rem;">
+                            <img src="/static/img/search.png" alt="Поиск" class="search-icon">
+                            <input type="text" id="search-input-project" class="search-input" placeholder="Поиск по проекту...">
+                            <span class="clear-icon" id="clear-search-project">&times;</span>
+                        </div>
+                        <div class="admin-users-table">
+                            <table class="custom-table" id="custom-table-project">
+                                <thead>
+                                    <tr>
+                                        <th>id</th>
+                                        <th>title</th>
+                                        <th>curator</th>
+                                        <th>product_owner</th>
+                                        <th>deadline</th>
+                                        <th>status</th>
+                                        <th>action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for project in projects %}
+                                    <tr>
+                                        <td>{{ project.id }}</td>
+                                        <td>{{ project.title }}</td>
+                                        <td>{{ project.curator }}</td>
+                                        <td>{{ project.product_owner }}</td>
+                                        <td>{{ project.deadline }}</td>
+                                        <td>{{ project.status }}</td>
+                                        <td>                                            
+                                            <div class="dropdown" style="position: unset;">
+                                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    ⋯
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href=" {{ url_for('admin.project_delete', project_id=project.id) }} ">
+                                                            Удалить проект
+                                                        </a>
+                                                    </li>
+                                                        {% if project.status == 'Завершен' or project.status == 'Задеживается' %}
+                                                    <li>
+                                                        <a class="dropdown-item" href=" {{ url_for('admin.project_back', project_id=project.id) }} ">
+                                                            Вернуть в работу
+                                                        </a>
+                                                    </li>
+                                                        {% else %}
+                                                    <li>
+                                                        <a class="dropdown-item" href=" {{ url_for('admin.project_close', project_id=project.id) }} ">
+                                                            Завершить проект
+                                                        </a>
+                                                    </li>
+                                                        {% endif %}
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+</div>  
+{% endblock %}

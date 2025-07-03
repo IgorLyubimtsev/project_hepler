@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block title %}Редактировать проект{% endblock %}
+{% block content %}
+
+<div class="page-wrapper">
+    <div class="container-fluid mt-5 col-10">
+        <div class="card-edit-project">
+            <div class="card-header">
+                <h2 class="mb-4">Редактирование проекта: {{ project.project_number if project else '' }}</h2>
+                <h4>Статус: {{form.status(style='border: unset; background-color: unset;')}}</h4>
+            </div>
+            <form method="post">
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    {% if current_user.status == 1 %}
+                        <div class="mb-3 floating-label-group">
+                            {{ form.creator(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False) }}
+                                <label for="{{ form.creator.id }}">Управляющий проектом</label>
+                            {% if form.creator.errors %}
+                                <div class="text-danger">{{ form.creator.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-4 floating-label-group">
+                        {{form.rating_id(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.rating_id.id }}">ID проекта в рейтинге ТБ</label>
+                        {% if form.rating_id.errors %}
+                        <div class="text-danger">{{ form.rating_id.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 col-md-4 floating-label-group">
+                        {{form.km_sup(class='form-control', id='kmSup', placeholder=' ', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.km_sup.id }}">КМ в СУП</label>
+                        {% for error in form.km_sup.errors %}
+                            <div class="text-danger">{{error}}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3 col-md-4 floating-label-group">
+                        {{form.sprint_id(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.sprint_id.id }}">ID Спринта в реестре спринтов BL СВА</label>
+                        {% if form.sprint_id.errors %}
+                        <div class="text-danger">{{ form.sprint_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-8 floating-label-group">
+                        {{ form.title(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False) }}
+                        <label for="{{ form.title.id }}">Название проекта</label>
+                        {% if form.title.errors %}
+                            <div class="text-danger">{{ form.title.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 col-md-4 floating-label-group">
+                        {{form.project_type(class='form-select', placeholder=' ', id='project_type', disabled=True if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.project_type.id }}">Тип проекта</label>
+                        <div class="select-error hidden">Пожалуйста, выберите тип проекта</div>
+                        {% if form.project_type.errors %}
+                        <div class="text-danger">{{ form.project_type.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-6 floating-label-group">
+                        {{form.curator(class='form-control', placeholder=' ', id='curator', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.curator.id }}">Куратор</label>
+                        {% if form.curator.errors %}
+                        <div class="text-danger">{{ form.curator.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 col-md-6 floating-label-group">
+                        {{form.product_owner(class='form-control', placeholder=' ', id='product_manager', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.product_owner.id }}">P.Owner (Спикер)</label>
+                        {% if form.product_owner.errors %}
+                        <div class="text-danger">{{ form.product_owner.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-12 floating-label-group">
+                        {{form.team(class='form-control', placeholder=' ', id='team', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.team.id }}">Команда</label>
+                        {% if form.team.errors %}
+                        <div class="text-danger">{{ form.team.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-3 floating-label-group">
+                        {{form.deadline(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' or current_user.status != 1 else False)}}
+                        <label for="{{ form.team.id }}">Deadline</label>
+                        {% if form.deadline.errors %}
+                        <div class="text-danger">{{ form.deadline.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 col-md-3 floating-label-group">
+                        {{form.agile_open_date(class='form-control', placeholder=' ', id='agile_open_date', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.agile_open_date.id }}">Дата открытия на Agile BL</label>
+                        {% if form.agile_open_date.errors %}
+                        <div class="text-danger">{{ form.agile_open_date.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 col-md-3 floating-label-group">
+                        {{form.open_protocol(class='form-control', placeholder=' ', id="open_protocol", readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.open_protocol.id }}">Номер протокола (открытие)</label>
+                        {% if form.open_protocol.errors %}
+                        <div class="text-danger">{{ form.open_protocol.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 col-md-3 floating-label-group">
+                        {{form.tech_extensions(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' or current_user.status != 1 else False)}}
+                        <label for="{{ form.tech_extensions.id }}">Количество технических продлений</label>
+                        {% if form.tech_extensions.errors %}
+                        <div class="text-danger">{{ form.tech_extensions.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="mb-3 col-md-4 floating-label-group">
+                        {{form.agile_close_date(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False)}}                      
+                        <label for="{{ form.agile_close_date.id }}">Дата закрытия на Agile BL</label>
+                        {% if form.agile_close_date.errors %}
+                        <div class="text-danger">{{ form.agile_close_date.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 col-md-4 floating-label-group">
+                        {{form.close_protocol(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' and current_user.status != 1 else False) }}
+                        <label for="{{ form.close_protocol.id }}">Номер протокола (закрытие)</label>
+                        {% if form.close_protocol.errors %}
+                        <div class="text-danger">{{ form.close_protocol.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3 col-md-4 floating-label-group">
+                        {{form.base_bank(class='form-select', placeholder=' ', id='base_bank', disabled=True if project.status == 'Завершен' and current_user.status != 1 else False)}}
+                        <label for="{{ form.base_bank.id }}">Базовый Банк</label>
+                        {% if form.base_bank.errors %}
+                        <div class="text-danger">{{ form.base_bank.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="edit-banks mb-3">
+                    <h5>Банки участники: </h5>
+                    <div class="row">
+                        <div class="col-1"> {{ form.bb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.bb.label }}</div>
+                        <div class="col-1"> {{ form.vvb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.vvb.label }}</div>
+                        <div class="col-1"> {{ form.dvb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.dvb.label }}</div>
+                        <div class="col-1"> {{ form.mb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.mb.label }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-1"> {{ form.pb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.pb.label }}</div>
+                        <div class="col-1"> {{ form.szb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.szb.label }}</div>
+                        <div class="col-1"> {{ form.sibb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.sibb.label }}</div>
+                        <div class="col-1"> {{ form.srb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.srb.label }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-1"> {{ form.ub(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.ub.label }}</div>
+                        <div class="col-1"> {{ form.ccb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.ccb.label }}</div>
+                        <div class="col-1"> {{ form.yuzb(disabled=True if project.status == 'Завершен' and current_user.status != 1 else False) }} {{ form.yuzb.label }}</div>
+                    </div>
+                </div>
+
+                <div class="edit-btn-area" style="border-top: 1px solid #d9d9d9; padding-top: 2rem; display: flex; justify-content: end; gap: 1rem;">
+                    <a href="{{ url_for('project_new.index') }}" class="btn btn-secondary ms-2" id="edit-btn-back">Назад</a>
+                    {% if (project.creator == current_user.id and project.status != 'Завершен') or current_user.status == 1 %}
+                    <button type="button" class="btn btn-warning tech-expension-btn" data-bs-toggle="modal" data-bs-target="#extensionModal">
+                        Оформить техническое продление
+                    </button>
+                       <a href="{{ url_for('project_new.complete_project', project_id=project.id) }}" id="close-project-btn" class="btn btn-success">Завершить</a>
+                    {{ form.submit(class='btn btn-success') }}
+                    {% endif %}
+                </div>
+            </form>
+        </div>   
+
+        <div class="modal fade" id="extensionModal" tabindex="-1" aria-labelledby="extensionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="POST">
+                    {{ extension_form.hidden_tag() }}
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="extensionModalLabel">Техническое продление</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3 floating-label-group">
+                                {{extension_form.new_deadline(class='form-control', placeholder=' ', id='new_deadline')}}
+                                    <label for="{{ extension_form.new_deadline.id }}">Новый Deadline</label>
+                                {% if extension_form.new_deadline.errors %}
+                                    <div class="text-danger">{{ extension_form.new_deadline.errors[0]}}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="modal-back-btn" data-bs-dismiss="modal">Отмена</button>
+                            {{ extension_form.submit_extension(class='btn btn-secondary', id='modal-success-btn') }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    
+    const select = document.getElementById('project_type');
+    const base_bank_select = document.getElementById('base_bank')
+    const agile_open_date_select = document.getElementById('agile_open_date')
+    const new_deadline_select = document.getElementById('new_deadline')
+
+    const errorMsg = document.querySelector('.select-error');
+
+
+    select.addEventListener('blur', () => {
+        if (select.value === '') {
+            select.classList.add('invalid');
+            select.classList.remove('hidden');
+        } else {
+            select.classList.remove('invalid');
+            if (!select.dataset.serverError) {
+                errorMsg.classList.add('hidden')
+            }     
+        }
+    });
+
+    base_bank_select.addEventListener('blur', () => {
+        if (base_bank_select.value === '') {
+            base_bank_select.classList.add('invalid');
+            base_bank_select.classList.remove('hidden');
+        } else {
+            base_bank_select.classList.remove('invalid');
+            if (!base_bank_select.dataset.serverError) {
+                errorMsg.classList.add('hidden')
+            }     
+        }
+    });
+
+    agile_open_date_select.addEventListener('blur', () => {
+        if (agile_open_date_select.value === '') {
+            agile_open_date_select.classList.add('invalid');
+            agile_open_date_select.classList.remove('hidden');
+        } else {
+            agile_open_date_select.classList.remove('invalid');
+            if (!agile_open_date_select.dataset.serverError) {
+                errorMsg.classList.add('hidden')
+            }     
+        }
+    });
+
+    new_deadline_select.addEventListener('blur', () => {
+        if (new_deadline_select.value === '') {
+            new_deadline_select.classList.add('invalid');
+            new_deadline_select.classList.remove('hidden');
+        } else {
+            new_deadline_select.classList.remove('invalid');
+            if (!new_deadline_select.dataset.serverError) {
+                errorMsg.classList.add('hidden')
+            }     
+        }
+    });
+
+</script>
+{% endblock %}

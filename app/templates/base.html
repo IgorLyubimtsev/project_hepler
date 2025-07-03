@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}PROJECT MANAGER{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='fav-icon-logo.png') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-container" class="position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1055;">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow" role="alert" style="min-width: 300px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% block header %}
+<header class="site-header">
+    <div class="header-container">
+        <div class="header-logo" style="margin-left: 3rem;">
+            <h1 style="font-weight: bold;">PROJECT MANAGER</h1>
+        </div>
+
+        <div class="right-block">
+            <div class="home-btn btn-hover">
+                <a href="{{ url_for('act.send_feedback')}}"><img src="/static/img/feedback.png" alt="home" title="Написать в поддержку"></a>
+            </div>
+            <div class="home-btn btn-hover">
+                <a href="{{ url_for('project_new.index')}}"><img src="/static/img/home.png" alt="home" title="Главная страница"></a>
+            </div>
+            <div class="user-block">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.status == 1 %}
+                        <a href="{{ url_for('admin.admin_panel') }}"><img src="./static/img/admin-panel.png" style="width: 2rem;" title="Админ-панель"></a>
+                        <a href="{{ url_for('auth.profile') }}">Admin</a>
+                        <img src="/static/img/admin_avatar.svg" alt="logo">
+                    {% else %}
+                        <a href="{{ url_for('auth.profile') }}">{{ current_user.full_name | fio_to_initials }}</a>
+                        <img src="/static/img/user_avatar.svg" alt="logo">
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}">Авторизоваться</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock %}
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/script.js')}}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

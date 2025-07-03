@@ -1,0 +1,73 @@
+{% extends 'base.html'%}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container mt-5 col-md-8">
+        <div class="register-card">
+            <div class="register-card-header pb-4">
+                <h1 style="text-align: center;">Регистрация</h1>
+            </div>
+            <div class="register-card-body mb-4 mt-4">
+                <form method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        <div class="form-group col-md-6 floating-label-group">
+                            {{ form.full_name(class='form-control', id='register-page-full-name', placeholder=' ') }}
+                            <label for="register-page-full-name">ФИО</label>
+                            <input type="hidden" name="register-page-full-name" id="register-page-full-name-hidden">
+                            {% if form.full_name.errors %}
+                                <div class="text-danger">{{ form.full_name.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group col-md-6 floating-label-group">
+                            {{ form.staff_number(class='form-control', id='register-page-staff-number', placeholder=' ') }}
+                            <label for="register-page-staff-number">Табельный номер</label>
+                            <input type="hidden" name="register-page-staff-number" id="register-page-staff-number-hidden">
+                            {% if form.staff_number.errors %}
+                                <div class="text-danger">{{ form.staff_number.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group floating-label-group">
+                            {{ form.department(class='form-control', id='register-page-department', placeholder=' ') }}
+                            <label for="register-page-department">Отдел</label>
+                            <input type="hidden" name="register-page-department" id="register-page-department-hidden">
+                            {% if form.department.errors %}
+                                <div class="text-danger">{{ form.department.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group floating-label-group">
+                            {{ form.position(class='form-control', id='register-page-position', placeholder=' ') }}
+                            <label for="register-page-position">Должность</label>
+                            <input type="hidden" name="register-page-position" id="register-page-position-hidden">
+                            {% if form.position.errors %}
+                                <div class="text-danger">{{ form.position.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group floating-label-group">
+                            {{ form.email(class='form-control', id='register-page-email', placeholder=' ') }}
+                            <label for="register-page-email">Email</label>
+                            <input type="hidden" name="register-page-email" id="register-page-email-hidden">
+                            {% if form.email.errors %}
+                                <div class="text-danger">{{ form.email.errors[0]}}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-evenly row">
+                        <div class="row  col-md-5">
+                            {{ form.submit(class='btn btn-primary mt-2') }}
+                        </div>
+                        <div class="row  col-md-5">
+                            <a href="{{ url_for('auth.login') }}" id="create-btn-back" class="btn btn-secondary mt-2">Вернуться к авторизации</a>
+                        </div> 
+                    </div>
+                </form>
+            </div>
+            <div class="register-card-footer"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

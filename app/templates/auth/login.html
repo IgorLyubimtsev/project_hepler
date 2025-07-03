@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container mt-5 d-flex justify-content-center align-items-center">
+        <div class="login-card col-md-5">
+            <div class="login-header pb-2">
+                <h1 style="text-align: center;">Авторизация</h1>
+            </div>
+            <div class='login-body mt-4 mb-4'>
+                <form method="post" class="d-flex flex-direction-column align-items-center" style="flex-direction: column;">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group floating-label-group col-md-10">
+                        {{ form.staff_number(class='form-control', id='login-page-staff-number', placeholder=' ') }}
+                        <label for="login-page-staff-number">Табельный номер</label>
+                        <input type="hidden" name="login-staff-number" id="login-page-staff-number-hidden">
+                        {% if form.staff_number.errors %}
+                            <div class="text-danger">{{ form.staff_number.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group floating-label-group col-md-10">
+                        {{ form.password(class='form-control', id='login-page-password', placeholder=' ')}}
+                        <label for="login-page-password">Пароль</label>
+                        <input type="hidden" name="login-password" id="login-page-password-hidden"></inputtype>
+                        {% if form.password.errors %}
+                            <div class="text-danger">{{ form.password.errors[0]}}</div>
+                        {% endif %}
+                    </div>
+                    <div class="btn-area col-md-10">
+                        {{ form.submit(class='btn btn-primary mt-2 col-md-12') }}
+                    </div>
+                </form>
+            </div>
+            <div class="login-footer pt-4 mt-2">
+                <div class="login-footer-lvl1 d-flex justify-content-evenly">
+                    <a href="{{ url_for('auth.register') }} " style="text-decoration: none; color: #333;" id="login-btn-reg">Зарегистрироваться</a>
+                    <a data-bs-toggle="modal" data-bs-target="#recoveryModal" style="cursor: pointer;">Восстановить пароль</a>
+                </div>
+                <div class="login-footer-lvl2 mt-3">
+                    <a href="{{ url_for('project_new.index') }}" style="text-decoration: none; color: #333;"><img src="./static/img/arrow.png" style="width: 1rem;"> На главную страницу</a>
+                </div>
+            </div>
+        </div>
+    </div>
+                <div class="modal fade" id="recoveryModal" tabindex="-1" aria-labelledby="recoveryModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form method="POST">
+                        {{ recovery.hidden_tag() }}
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="recoveryModalLabel">Восстановление пароля</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3 floating-label-group">
+                                    {{recovery.staff_number(class='form-control', placeholder=' ', id='recovery_code')}}
+                                        <label for="recovery_code">Табельный номер</label>
+                                    {% if recovery.staff_number.errors %}
+                                        <div class="text-danger">{{ recovery.staff_number.errors[0]}}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="modal-back-btn" data-bs-dismiss="modal">Отмена</button>
+                                {{ recovery.submit(class='btn btn-secondary', id='modal-success-btn') }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+</div>
+{% endblock %}

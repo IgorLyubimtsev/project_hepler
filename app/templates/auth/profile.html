@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="page-wrapper">
+        <div class="container mt-5">
+            <div class="profile-card">
+                <div class="profile-header d-flex justify-content-between">
+                    <h1>{{ user_full_name }}</h1>
+                    <a href="{{ url_for('auth.logout') }}"><img src="./static/img/logout.png" style="width: 2rem;" title="Выйти из аккаунта"></a>
+                </div>
+                <div class="profile-body mt-4 d-flex row">
+                    <div class="profile-info col-md-6">
+                        <h2 style="margin-bottom: 2rem; border-bottom: 1px solid #212529; padding-bottom: 1rem;">О сотруднике</h2>
+                        <div class="form-group row" style="padding: 10px;">
+                            <h4 class="col-md-3">Таб.номер: </h4>
+                            <h4 class="col-md-9">{{ user_staff_number }}</h4>
+                        </div>
+                        <div class="form-group row" style="padding: 10px;">
+                            <h4 class="col-md-3">Отдел: </h4>
+                            <h4 class="col-md-9">{{ user_department }}</h4>
+                        </div>
+                        <div class="form-group row" style="padding: 10px;">
+                            <h4 class="col-md-3">Должность: </h4>
+                            <h4 class="col-md-9">{{ user_position }}</h4>
+                        </div>
+                        <div class="form-group row" style="padding: 10px;">
+                            <h4 class="col-md-3">Email: </h4>
+                            <h4 class="col-md-9">{{ user_email }}</h4>
+                        </div>
+                        <div class="form-group row" style="padding: 10px;">
+                            <h4 class="col-md-3">Статус: </h4>
+                            <h4 class="col-md-9">{{ user_status }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-6 profile-projects">
+                        <h2 style="margin-bottom: 2rem; border-bottom: 1px solid #212529; padding-bottom: 1rem;">Ваши проекты</h2>
+                        <div class="table-options"  style="overflow-y: auto; height: 400px;">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Номер проекта</th>
+                                        <th>Название проекта</th>
+                                        <th>Статус</th>
+                                        <th>Действие</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in users_projects %}
+                                        <tr>
+                                            <td>{{ p.project_number }}</td>
+                                            <td>{{ p.title }}</td>
+                                            <td>{{ p.status }}</td>
+                                            <td><a href="{{ url_for('project_new.edit_project', project_id=p.id) }}">Перейти к проекту</a></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>                                    
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
