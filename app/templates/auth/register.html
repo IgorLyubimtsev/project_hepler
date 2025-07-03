@@ -12,7 +12,7 @@
                     {{ form.hidden_tag() }}
                     <div class="row">
                         <div class="form-group col-md-6 floating-label-group">
-                            {{ form.full_name(class='form-control', id='register-page-full-name', placeholder=' ') }}
+                            {{ form.full_name(class='form-control', id='register-page-full-name', placeholder=' ', autofocus=True) }}
                             <label for="register-page-full-name">ФИО</label>
                             <input type="hidden" name="register-page-full-name" id="register-page-full-name-hidden">
                             {% if form.full_name.errors %}

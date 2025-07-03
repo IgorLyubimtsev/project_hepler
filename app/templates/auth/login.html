@@ -21,7 +21,7 @@
                     <div class="form-group floating-label-group col-md-10">
                         {{ form.password(class='form-control', id='login-page-password', placeholder=' ')}}
                         <label for="login-page-password">Пароль</label>
-                        <input type="hidden" name="login-password" id="login-page-password-hidden"></inputtype>
+                        <input type="hidden" name="login-password" id="login-page-password-hidden">
                         {% if form.password.errors %}
                             <div class="text-danger">{{ form.password.errors[0]}}</div>
                         {% endif %}

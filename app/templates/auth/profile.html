@@ -6,7 +6,7 @@
             <div class="profile-card">
                 <div class="profile-header d-flex justify-content-between">
                     <h1>{{ user_full_name }}</h1>
-                    <a href="{{ url_for('auth.logout') }}"><img src="./static/img/logout.png" style="width: 2rem;" title="Выйти из аккаунта"></a>
+                    <a href="{{ url_for('auth.logout') }}"><img src="./static/img/logout.png" style="width: 2rem;" title="Выйти из аккаунта" alt="Выйти"></a>
                 </div>
                 <div class="profile-body mt-4 d-flex row">
                     <div class="profile-info col-md-6">
@@ -35,6 +35,7 @@
                     <div class="col-md-6 profile-projects">
                         <h2 style="margin-bottom: 2rem; border-bottom: 1px solid #212529; padding-bottom: 1rem;">Ваши проекты</h2>
                         <div class="table-options"  style="overflow-y: auto; height: 400px;">
+                            {% if users_projects %}
                             <table class="custom-table">
                                 <thead>
                                     <tr>
@@ -55,6 +56,9 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                            {% else %}
+                            <p>У вас пока нет проектов</p>
+                            {% endif %}
                         </div>
                     </div>                                    
                 </div>

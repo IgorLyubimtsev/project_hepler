@@ -5,10 +5,15 @@ from .extensions import db, login_manager
 from app.models import Users, register_background_tasks
 from flask_session import Session
 from datetime import timedelta
+from app.logging import logger
 
 csrf = CSRFProtect()
 
 def create_app():
+    """
+    Фабрика приложения Flask.
+    Инициализирует и настраивает приложение, расширения, blueprint-ы и фоновые задачи.
+    """
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'Asmadey'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../instance/projects.db'
@@ -25,9 +30,9 @@ def create_app():
     login_manager.init_app(app)
     csrf.init_app(app)
 
-    login_manager.login_view = 'auth.login'  # редирект если не авторизован
+    login_manager.login_view = 'auth.login'  # Редирект при попытке доступа к защищенным страницам без авторизации
 
-    # Импортируем и регистрируем маршруты
+    # Регистрация blueprint-ов
     from .routes.auth_routes import auth_bp
     from .routes.project_routes import project_bp
     from .routes.admin_routes import admin_bp
@@ -38,13 +43,19 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(act_bp)
 
+    # Регистрируем фоновые задачи, если есть
     register_background_tasks(app)
 
     @login_manager.user_loader
     def load_user(user_id):
+        """Загружает пользователя по ID для Flask-Login."""
         return Users.query.get(int(user_id))
 
     def fio_to_initials(value):
+        """
+        Фильтр Jinja2 для преобразования ФИО в формат 'Фамилия И.О.'.
+        Пример: Иванов Иван Иванович -> Иванов И.И.
+        """
         import re
         pattern = r'^(\S+)\s+(\S)\S*\s+(\S)\S*$'
         return re.sub(pattern, r'\1 \2.\3.', value)
@@ -57,7 +68,10 @@ def create_app():
         from .utils import create_excel_backup
 
         scheduler = BackgroundScheduler()
-        scheduler.add_job(func=create_excel_backup, trigger='interval', hours=24)
-        scheduler.start()
+        try:
+            scheduler.add_job(func=create_excel_backup, trigger='interval', hours=24)
+            scheduler.start()
+        except Exception as e:
+            logger.error(f"Ошибка при запуске планировщика: {e}")
 
     return app

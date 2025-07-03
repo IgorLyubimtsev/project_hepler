@@ -19,7 +19,7 @@
                         </div>
                         <div class="floating-label-group col-4">
                             {{ form.project_type(class='form-select', placeholder=' ') }}
-                            <label for="{{ form.title.id }}">Тип проекта</label>
+                            <label for="{{ form.project_type.id }}">Тип проекта</label>
                             <div class="select-error hidden">Пожалуйста, выберите тип проекта</div>
                             {% if form.project_type.errors %}
                                 <div class="select-error">{{ form.project_type.errors[0] }}</div>
@@ -127,6 +127,10 @@
 
 {% block scripts %}
 <script>
+
+    document.querySelector("form").addEventListener("submit", () => {
+        document.querySelector("button[type='submit']").disabled = true;
+    });
 
     const select = document.getElementById('project_type');
     const base_bank_select = document.getElementById('base_bank')

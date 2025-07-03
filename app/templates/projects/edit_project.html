@@ -92,7 +92,7 @@
                 <div class="row">
                     <div class="mb-3 col-md-3 floating-label-group">
                         {{form.deadline(class='form-control', placeholder=' ', readonly='readonly' if project.status == 'Завершен' or current_user.status != 1 else False)}}
-                        <label for="{{ form.team.id }}">Deadline</label>
+                        <label for="{{ form.deadline.id }}">Deadline</label>
                         {% if form.deadline.errors %}
                         <div class="text-danger">{{ form.deadline.errors[0]}}</div>
                         {% endif %}
@@ -211,12 +211,10 @@
 <script>
     
     const select = document.getElementById('project_type');
+    const errorMsg = select?.closest('.floating-label-group')?.querySelector('.select-error');
     const base_bank_select = document.getElementById('base_bank')
     const agile_open_date_select = document.getElementById('agile_open_date')
     const new_deadline_select = document.getElementById('new_deadline')
-
-    const errorMsg = document.querySelector('.select-error');
-
 
     select.addEventListener('blur', () => {
         if (select.value === '') {

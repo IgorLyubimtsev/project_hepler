@@ -1,61 +1,92 @@
-function getOtherFields(inputId) {
+/**
+ * Создаёт и возвращает элемент UL для списка автодополнения с базовыми стилями
+ */
+function createAutocompleteList() {
+    const list = document.createElement("ul");
+    list.className = "autocomplete-list";
+    Object.assign(list.style, {
+        position: "absolute",
+        zIndex: "1000",
+        backgroundColor: "white",
+        border: "1px solid #ccc",
+        listStyle: "none",
+        padding: "0",
+        marginTop: "0"
+    });
+    return list;
+}
 
-    const input = document.getElementById(inputId) //Обращаюсь к странице с поиском указанного в параметрах айди
+/**
+ * Автозаполнение с подгрузкой данных и заполнением дополнительных полей по выбранному ФИО
+ * Используется для поля ФИО с ID inputId
+ */
+function getOtherFields(inputId) {
+    const input = document.getElementById(inputId);
     if (!input) return;
 
-    input.addEventListener('input', () => { //Создаю слушателя на ввод данных
-        const query = input.value //Создаю переменную считывающую пользовательский ввод
+    input.addEventListener('input', () => {
+        const query = input.value.trim();
 
-        if (query.length < 2) return; //Если пользовательский ввод меньше чем 2 символа, тогда ничего не выводим
+        // Удаляем старый список, если он есть
+        const existingList = input.parentNode.querySelector(".autocomplete-list");
+        if (existingList) existingList.remove();
+
+        if (query.length < 2) return;
 
         fetch(`/search_employee?q=${encodeURIComponent(query)}`)
-        .then(res=>res.json())
-        .then(data=> {
+            .then(res => {
+                if (!res.ok) throw new Error("Ошибка сети при поиске сотрудника");
+                return res.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data) || data.length === 0) return;
 
-            const existingList = input.parentNode.querySelector(".autocomplete-list");
-            if (existingList) existingList.remove();
+                const list = createAutocompleteList();
 
-            const list = document.createElement("ul");
-            list.className = "autocomplete-list";
-            list.style.position = "absolute";
-            list.style.zIndex = "1000";
-            list.style.backgroundColor = "white";
-            list.style.border = "1px solid #ccc";
-            list.style.listStyle = "none";
-            list.style.padding = "0";
-            list.style.marginTop = "0";
+                data.forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = item['full_name'];
+                    li.style.padding = "5px 10px";
+                    li.style.cursor = "pointer";
 
-            data.forEach(item => {
+                    li.addEventListener("click", () => {
+                        const staff_number = document.getElementById('register-page-staff-number');
+                        const position = document.getElementById('register-page-position');
+                        const department = document.getElementById('register-page-department');
+                        const email = document.getElementById('register-page-email');
 
-                const li = document.createElement("li");
-                li.textContent = item['full_name'];
-                li.style.padding = "5px 10px";
-                li.style.cursor = "pointer";
+                        input.value = item['full_name'];
+                        if (staff_number) staff_number.value = item['staff_number'] || "";
+                        if (position) position.value = item['position'] || "";      // исправлено
+                        if (department) department.value = item['department'] || ""; // исправлено
+                        if (email) email.value = item['email'] || "";
 
-                li.addEventListener("click", () => {
+                        list.remove();
+                    });
 
-                    const staff_number = document.getElementById('register-page-staff-number')
-                    const position = document.getElementById('register-page-position')
-                    const department = document.getElementById('register-page-department')
-                    const email = document.getElementById('register-page-email')
-
-                    input.value = item['full_name'];
-                    staff_number.value = item['staff_number']
-                    position.value = item['department']
-                    department.value = item['position']
-                    email.value = item['email']
-                    list.remove();
+                    list.appendChild(li);
                 });
 
-                list.appendChild(li);
+                input.parentNode.appendChild(list);
+            })
+            .catch(err => {
+                console.error("Ошибка в getOtherFields:", err);
             });
+    });
 
-            input.parentNode.appendChild(list);
-        });
-    })
-
+    // Закрытие списка при клике вне input и списка
+    document.addEventListener("click", (e) => {
+        const list = input.parentNode.querySelector(".autocomplete-list");
+        if (list && !list.contains(e.target) && e.target !== input) {
+            list.remove();
+        }
+    });
 }
-// Дроплист для полей "Куратор" и "Спикер"
+
+/**
+ * Универсальный автокомплит с возможностью указать поля для метки и значения
+ * И опциональным скрытым инпутом для табельного номера
+ */
 function initAutocomplete(inputId, options = {}) {
     const input = document.getElementById(inputId);
     if (!input) return;
@@ -65,32 +96,37 @@ function initAutocomplete(inputId, options = {}) {
         minChars = 2,
         labelField = "label",
         valueField = "value",
-        hiddenInputId = null,  // если нужен табельный номер отдельно
+        hiddenInputId = null,
+        debounceDelay = 300
     } = options;
 
     let timeout = null;
+
     input.addEventListener("input", () => {
         clearTimeout(timeout);
-        const query = input.value;
 
-        if (query.length < minChars) return;
+        const query = input.value.trim();
+
+        // Если меньше минимума - убираем список и выходим
+        if (query.length < minChars) {
+            const existingList = input.parentNode.querySelector(".autocomplete-list");
+            if (existingList) existingList.remove();
+            return;
+        }
 
         timeout = setTimeout(() => {
             fetch(`${url}?q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error("Ошибка сети при поиске");
+                    return res.json();
+                })
                 .then(data => {
                     const existingList = input.parentNode.querySelector(".autocomplete-list");
                     if (existingList) existingList.remove();
 
-                    const list = document.createElement("ul");
-                    list.className = "autocomplete-list";
-                    list.style.position = "absolute";
-                    list.style.zIndex = "1000";
-                    list.style.backgroundColor = "white";
-                    list.style.border = "1px solid #ccc";
-                    list.style.listStyle = "none";
-                    list.style.padding = "0";
-                    list.style.marginTop = "0";
+                    if (!Array.isArray(data) || data.length === 0) return;
+
+                    const list = createAutocompleteList();
 
                     data.forEach(item => {
                         const li = document.createElement("li");
@@ -113,10 +149,14 @@ function initAutocomplete(inputId, options = {}) {
                     });
 
                     input.parentNode.appendChild(list);
+                })
+                .catch(err => {
+                    console.error("Ошибка в initAutocomplete:", err);
                 });
-        }, 300);
+        }, debounceDelay);
     });
 
+    // Закрываем список при клике вне поля и списка
     document.addEventListener("click", (e) => {
         const list = input.parentNode.querySelector(".autocomplete-list");
         if (list && !list.contains(e.target) && e.target !== input) {
@@ -124,7 +164,9 @@ function initAutocomplete(inputId, options = {}) {
         }
     });
 }
-// Дроплист сотрудников для поля "Команда"
+/**
+ * Множественный автокомплит для поля с разделителем (например, табельные номера через ;)
+ */
 function initMultiAutocomplete(inputId, options = {}) {
     const input = document.getElementById(inputId);
     if (!input) return;
@@ -134,7 +176,8 @@ function initMultiAutocomplete(inputId, options = {}) {
         minChars = 2,
         labelField = "label",
         valueField = "value",
-        delimiter = ";"
+        delimiter = ";",
+        debounceDelay = 300
     } = options;
 
     let timeout = null;
@@ -144,28 +187,17 @@ function initMultiAutocomplete(inputId, options = {}) {
 
         let value = input.value;
 
-        // Удаляем лишний разделитель, если он в конце и после него ничего нет
-        if (value.endsWith(delimiter) && value.slice(-2) === delimiter + " ") {
+        // Удаляем лишние пробелы вокруг разделителей, добавляем разделитель, если нужно
+        if (value.endsWith(delimiter + " ")) {
             value = value.slice(0, -2) + delimiter;
         }
 
-        // Автоматически добавляем ; если его нет после последнего табельника
-        if (!value.endsWith(delimiter) && !value.endsWith(" ") && value.split(delimiter).length > 1) {
+        if (!value.endsWith(delimiter) && !value.endsWith(" ")) {
             const parts = value.split(delimiter);
             const last = parts[parts.length - 1].trim();
 
-            // Если последний фрагмент — это валидный табельник (8 цифр)
             if (/^\d{8}$/.test(last)) {
                 value += delimiter;
-            }
-        }
-
-        // Убираем ; если после него ничего нет
-        if (value.endsWith(delimiter)) {
-            const parts = value.split(delimiter);
-            const last = parts[parts.length - 1];
-            if (last.trim() === "") {
-                // ничего не делаем — пользователь начинает вводить
             }
         }
 
@@ -174,24 +206,25 @@ function initMultiAutocomplete(inputId, options = {}) {
         const parts = value.split(delimiter);
         const currentQuery = parts[parts.length - 1].trim();
 
-        if (currentQuery.length < minChars) return;
+        if (currentQuery.length < minChars) {
+            const existingList = input.parentNode.querySelector(".autocomplete-list");
+            if (existingList) existingList.remove();
+            return;
+        }
 
         timeout = setTimeout(() => {
             fetch(`${url}?q=${encodeURIComponent(currentQuery)}`)
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error("Ошибка сети при поиске");
+                    return res.json();
+                })
                 .then(data => {
                     const existingList = input.parentNode.querySelector(".autocomplete-list");
                     if (existingList) existingList.remove();
 
-                    const list = document.createElement("ul");
-                    list.className = "autocomplete-list";
-                    list.style.position = "absolute";
-                    list.style.zIndex = "1000";
-                    list.style.backgroundColor = "white";
-                    list.style.border = "1px solid #ccc";
-                    list.style.listStyle = "none";
-                    list.style.padding = "0";
-                    list.style.marginTop = "0";
+                    if (!Array.isArray(data) || data.length === 0) return;
+
+                    const list = createAutocompleteList();
 
                     data.forEach(item => {
                         const li = document.createElement("li");
@@ -200,10 +233,10 @@ function initMultiAutocomplete(inputId, options = {}) {
                         li.style.cursor = "pointer";
 
                         li.addEventListener("click", () => {
-                            // Заменяем последний фрагмент на выбранный табельник
                             parts[parts.length - 1] = item[valueField];
+                            // Убираем дубликаты и пустые значения
                             const cleanParts = [...new Set(parts.map(p => p.trim()).filter(p => p))];
-                            input.value = cleanParts.join(delimiter) + delimiter; // сразу добавляем ; после выбора
+                            input.value = cleanParts.join(delimiter) + delimiter;
                             list.remove();
                         });
 
@@ -211,10 +244,14 @@ function initMultiAutocomplete(inputId, options = {}) {
                     });
 
                     input.parentNode.appendChild(list);
+                })
+                .catch(err => {
+                    console.error("Ошибка в initMultiAutocomplete:", err);
                 });
-        }, 300);
+        }, debounceDelay);
     });
 
+    // Закрытие списка при клике вне поля и списка
     document.addEventListener("click", (e) => {
         const list = input.parentNode.querySelector(".autocomplete-list");
         if (list && !list.contains(e.target) && e.target !== input) {
@@ -223,22 +260,25 @@ function initMultiAutocomplete(inputId, options = {}) {
     });
 }
 
+/**
+ * Фильтрация таблицы по введённому значению в поле поиска
+ */
 function searchTableValues(value) {
-
     const searchInput = document.getElementById(`search-input-${value}`);
-
     if (!searchInput) return;
 
     const clearIcon = document.getElementById(`clear-search-${value}`);
     const table = document.getElementById(`custom-table-${value}`);
+    if (!table) return;
     const rows = table.getElementsByTagName('tr');
 
     function filterTable() {
-        const filter = searchInput.value.toLowerCase()
+        const filter = searchInput.value.toLowerCase();
 
         clearIcon.style.display = filter ? 'block' : 'none';
 
-        for (let i = 1; i < rows.length; i++) {
+        const rowsCount = rows.length;
+        for (let i = 1; i < rowsCount; i++) {
             const row = rows[i];
             const text = row.textContent.toLowerCase();
             row.style.display = text.includes(filter) ? '' : 'none';
@@ -247,81 +287,48 @@ function searchTableValues(value) {
 
     searchInput.addEventListener('input', filterTable);
 
-    clearIcon.addEventListener('click', function () {
+    clearIcon.addEventListener('click', () => {
         searchInput.value = '';
         filterTable();
     });
 }
 
-function getTabCard() {
-    const main_div = document.querySelectorAll('.clickable');
-    
-    if (!main_div) return
 
-    main_div.forEach((header, index) => {
+/**
+ * Открытие/закрытие табов по клику на заголовок
+ */
+function getTabCard() {
+    const headers = document.querySelectorAll('.clickable');
+    if (headers.length === 0) return;
+
+    headers.forEach((header, index) => {
         header.addEventListener('click', () => {
             const allBlocks = document.querySelectorAll('.hidden-content');
-            const thisBlock = allBlocks[index]
+            if (index >= allBlocks.length) return;
 
-            const isAlreadyOpen = thisBlock.classList.contains('open')
+            const thisBlock = allBlocks[index];
+            const isAlreadyOpen = thisBlock.classList.contains('open');
 
-            allBlocks.forEach(div => div.classList.remove('open'))
+            allBlocks.forEach(div => div.classList.remove('open'));
 
             if (!isAlreadyOpen) {
-                thisBlock.classList.add('open')
+                thisBlock.classList.add('open');
             }
         });
     });
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+/**
+ * Инициализация всплывающих подсказок для input с классом .input-with-tooltip
+ */
+function initTooltips() {
+    const tooltip = document.getElementById("tooltip");
+    if (!tooltip) return;
+    const tooltipText = tooltip.querySelector(".tooltip-text");
 
-    searchTableValues('user')
-    searchTableValues('project')
-    searchTableValues('index')
-    getTabCard()
-
-    const alerts = document.querySelectorAll('.alert');
-
-    alerts.forEach(function (alert) {
-        setTimeout(function () {
-            alert.classList.remove('show');
-            alert.classList.add('hide');
-
-            setTimeout(function () {
-                alert.remove();
-            }, 300);
-        }, 5000);
-    });
-
-    getOtherFields('register-page-full-name');
-
-    initAutocomplete("create-page-product-owner-autocomplete", {
-        url: "/search_employees",
-        valueField: "value",         // табельный номер
-        labelField: "label",         // ФИО + отдел
-        hiddenInputId: "create-page-product-owner-hidden"
-    });
-
-    initAutocomplete("create-page-curator-autocomplete", {
-        url: "/search_employees",
-        valueField: "value",         // табельный номер
-        labelField: "label",         // ФИО + отдел
-        hiddenInputId: "create-page-curator-hidden"
-    });
-
-    initMultiAutocomplete("create-page-team-autocomplete", {
-        valueField: "value",         // табельный номер
-        labelField: "label",         // ФИО, должность и т.п.
-        delimiter: ";"               // Разделитель табельников
-    });
-
-    // TOOLTIPS 
     document.querySelectorAll(".input-with-tooltip").forEach(input => {
         input.addEventListener("focus", () => {
-            const tooltip = document.getElementById("tooltip");
-            const tooltipText = tooltip.querySelector(".tooltip-text");
-            tooltipText.textContent = input.dataset.tooltip;
+            tooltipText.textContent = input.dataset.tooltip || "";
 
             const rect = input.getBoundingClientRect();
             tooltip.style.left = rect.left + window.scrollX + "px";
@@ -335,19 +342,70 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         input.addEventListener("blur", () => {
-            document.getElementById("tooltip").style.display = "none";
+            tooltip.style.display = "none";
         });
     });
+}
 
-    // FLASH-ALERTS
-    document.addEventListener("DOMContentLoaded", function () {
-        const flashContainer = document.getElementById("flash-container");
-        if (flashContainer) {
-            setTimeout(() => {
-            flashContainer.style.transition = "opacity 0.5s ease-out";
-            flashContainer.style.opacity = "0";
-            setTimeout(() => flashContainer.remove(), 500); // удалить после анимации
-            }, 2000); // 2 секунды
-        }
+/**
+ * Автоматическое скрытие flash-уведомлений с плавным исчезновением
+ */
+function initFlashAlerts() {
+    const flashContainer = document.getElementById("flash-container");
+    if (!flashContainer) return;
+
+    setTimeout(() => {
+        flashContainer.style.transition = "opacity 0.5s ease-out";
+        flashContainer.style.opacity = "0";
+        setTimeout(() => flashContainer.remove(), 500);
+    }, 2000);
+}
+
+// === Основная точка входа ===
+document.addEventListener('DOMContentLoaded', function () {
+    // Инициализация поиска в таблицах
+    searchTableValues('user');
+    searchTableValues('project');
+    searchTableValues('index');
+
+    // Инициализация табов
+    getTabCard();
+
+    // Скрытие alert-уведомлений
+    document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => {
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+            setTimeout(() => alert.remove(), 300);
+        }, 5000);
     });
+
+    // Инициализация автозаполнения
+    getOtherFields('register-page-full-name');
+
+    initAutocomplete("create-page-product-owner-autocomplete", {
+        url: "/search_employees",
+        valueField: "value",         // табельный номер
+        labelField: "label",         // ФИО + отдел
+        hiddenInputId: "create-page-product-owner-hidden"
+    });
+
+    initAutocomplete("create-page-curator-autocomplete", {
+        url: "/search_employees",
+        valueField: "value",
+        labelField: "label",
+        hiddenInputId: "create-page-curator-hidden"
+    });
+
+    initMultiAutocomplete("create-page-team-autocomplete", {
+        valueField: "value",
+        labelField: "label",
+        delimiter: ";"
+    });
+
+    // Инициализация тултипов
+    initTooltips();
+
+    // Инициализация flash-уведомлений
+    initFlashAlerts();
 });

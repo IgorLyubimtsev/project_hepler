@@ -68,22 +68,21 @@
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     {% if user.status == 0 %}
-                                                        <li>
-                                                            <a class="dropdown-item" href=" {{ url_for('admin.add_admin', user_id=user.id) }} ">
-                                                                Сделать админом
-                                                            </a>
-                                                        </li>
+                                                    <form action="{{ url_for('admin.add_admin', user_id=user.id) }}" method="post" style="display: inline;">
+                                                        {{ form.hidden_tag() }}
+                                                        <button type="submit" class="dropdown-item">Сделать админом</button>
+                                                    </form>
                                                     {% else %}
-                                                        <li>
-                                                            <a class="dropdown-item" href=" {{ url_for('admin.admin_unset', user_id=user.id) }} ">
-                                                                Убрать админку
-                                                            </a>
-                                                        </li>
+                                                    <form action="{{ url_for('admin.admin_unset', user_id=user.id) }}" method="post" style="display: inline;">
+                                                        {{ form.hidden_tag() }}
+                                                        <button type="submit" class="dropdown-item">Убрать админку</button>
+                                                    </form>
                                                     {% endif %}
                                                     <li>
-                                                        <a class="dropdown-item" href=" {{ url_for('admin.user_delete', user_id=user.id) }} ">
-                                                            Удалить аккаунт
-                                                        </a>
+                                                        <form action="{{ url_for('admin.user_delete', user_id=user.id) }}" method="post" style="display: inline;">
+                                                            {{ form.hidden_tag() }}
+                                                            <button type="submit" class="dropdown-item">Удалить аккаунт</button>
+                                                        </form>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -132,21 +131,24 @@
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a class="dropdown-item" href=" {{ url_for('admin.project_delete', project_id=project.id) }} ">
-                                                            Удалить проект
-                                                        </a>
+                                                        <form action="{{ url_for('admin.project_delete', project_id=project.id) }}" method="post">
+                                                            {{ form.hidden_tag() }}
+                                                            <button type="submit" class="dropdown-item">Удалить проект</button>
+                                                        </form>
                                                     </li>
                                                         {% if project.status == 'Завершен' or project.status == 'Задеживается' %}
                                                     <li>
-                                                        <a class="dropdown-item" href=" {{ url_for('admin.project_back', project_id=project.id) }} ">
-                                                            Вернуть в работу
-                                                        </a>
+                                                        <form action="{{ url_for('admin.project_back', project_id=project.id) }}" method="post">
+                                                            {{ form.hidden_tag() }}
+                                                            <button type="submit" class="dropdown-item">Вернуть в работу</button>
+                                                        </form>
                                                     </li>
                                                         {% else %}
                                                     <li>
-                                                        <a class="dropdown-item" href=" {{ url_for('admin.project_close', project_id=project.id) }} ">
-                                                            Завершить проект
-                                                        </a>
+                                                        <form action="{{ url_for('admin.project_close', project_id=project.id) }}" method="post">
+                                                            {{ form.hidden_tag() }}
+                                                            <button type="submit" class="dropdown-item">Завершить проект</button>
+                                                        </form>
                                                     </li>
                                                         {% endif %}
                                                 </ul>

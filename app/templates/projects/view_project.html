@@ -8,19 +8,11 @@
             <div class="row gy-4">
                 
                 {% for field in display_fields %}
-                {% set value = project_dict[field] %}
-                {% if value %}
+                {% set value = project_dict.get(field) %}
                 <div class="col-md-6">
                     <label class="form-label text-muted"> {{ field_labels.get(field, field|replace('_', ' ')|title) }} </label>
-                    <div class="fs-5 fw-semibold">{{ value }}</div>
+                    <div class="fs-5 fw-semibold">{{ value if value else '-' }}</div>
                 </div>
-
-                {% else %}
-                <div class="col-md-6">
-                    <label class="form-label text-muted"> {{ field_labels.get(field, field|replace('_', ' ')|title) }} </label>
-                    <div class="fs-5 fw-semibold">-</div>
-                </div>
-                {% endif %}
                 {% endfor %}
 
                 <div class="col-md-6">
@@ -37,6 +29,12 @@
                         {% if project.ub %}УБ {% endif %}
                         {% if project.ccb %}ЦЧБ {% endif %}
                         {% if project.yuzb %}ЮЗБ {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Статус</label>
+                    <div class="fs-5 fw-semibold text-{{ 'success' if project.status == 'Завершен' else 'info' }}">
+                        {{ project.status }}
                     </div>
                 </div>
             </div>
